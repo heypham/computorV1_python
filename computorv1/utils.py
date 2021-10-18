@@ -1,4 +1,5 @@
 import argparse
+from functools import reduce
 import re
 
 class polynomial():
@@ -27,7 +28,6 @@ class parser():
         self.args = self._parse_arguments()
         self.left_poly = polynomial()
         self.right_poly = polynomial()
-        # print(self.args)
 
     def _parse_arguments(self):
         """
@@ -75,7 +75,6 @@ class parser():
             group['coef'] = 1 * group['sign']
         else:
             group['coef'] = group['coef'] * group['sign']
-        # print("Updating {} poly with {}x^{}".format(state['side'], group['coef'], group['degree']))
         if state['side'] == 'left':
             poly = self.left_poly
         else:
@@ -188,6 +187,9 @@ class parser():
             group, state = self._update_polynomial(state, group, match)
 
     def _create_reduced_form(self):
+        """
+        Once both left and right equations have been parsed and verified, we compute the reduced form
+        """
         reduced = {}
         left = self.left_poly.coefs
         right = self.right_poly.coefs
@@ -205,6 +207,30 @@ class parser():
                 del reduced[degree]
         return reduced
 
+    def _print_reduced_form(self):
+        """
+        Organisation to print as shown on subject
+        """
+        reduced_str = "Reduced form: "
+        first = True
+        for degree, coef in self.reduced_form.items():
+            if coef < 0:
+                reduced_str = reduced_str + "- "
+                coef = -coef
+            else:
+                if first == False:
+                    reduced_str = reduced_str + "+ "
+            if coef.is_integer() == True:
+                coef = int(coef)
+            reduced_str = reduced_str + str(coef)
+            reduced_str = reduced_str + " * X^"
+            reduced_str = reduced_str + str(degree) + " "
+            if first == True:
+                first = False
+        reduced_str = reduced_str + "= 0\n"
+        reduced_str = reduced_str + "Polynomial degree: {}".format(max(self.reduced_form))
+        return reduced_str
+
     def parse(self):
         """
         Parsing method called from main
@@ -215,6 +241,7 @@ class parser():
             self._parse_coefficients(self.left_poly, 'left')
             self._parse_coefficients(self.right_poly, 'right')
             self.reduced_form = self._create_reduced_form()
-            print(self.reduced_form)
+            reduced_str = self._print_reduced_form()
+            print(reduced_str)
         except Exception as e:
             print("Error: {}".format(e))
