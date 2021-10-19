@@ -1,5 +1,4 @@
 import argparse
-from functools import reduce
 import re
 
 class polynomial():
@@ -14,11 +13,7 @@ class polynomial():
     """
     def __init__(self):
         self.str = ""
-        self.coefs = {
-            0:0,
-            1:0,
-            2:0
-        }
+        self.coefs = {}
 
 class parser():
     """
@@ -36,6 +31,7 @@ class parser():
         try:
             parser = argparse.ArgumentParser(prog='computor', usage='python3 %(prog)s.py [-h] equation', description='Equation solver')
             parser.add_argument('-v', '--verbose', help='increase output verbosity', action='store_true')
+            parser.add_argument('-p', '--plot', help='display function graph', action='store_true')
             parser.add_argument('equation', help='equation in the form "a * x^2 + b * x^1 + c * x^0 = d * x^2 + e * x^1 + f * x^0"', type=str)
             args = parser.parse_args()
             return args
@@ -48,10 +44,10 @@ class parser():
         """
         accepted_char = "0123456789xX*^=+-. "
         if equation.count('=') != 1:
-            raise NameError("[parser._verify_equation] Incorrect number of '=' symbol detected. You either have more than one equation or no equation at all!")
+            raise NameError("Parsing error [_verify_equation] : Incorrect number of '=' symbol detected. You either have more than one equation or no equation at all!")
         for char in self.args.equation:
             if char not in accepted_char:
-                raise NameError("[parser._verify_equation] Invalid character {} at position {}".format(char, str(self.args.equation.index(char) + 1)))
+                raise NameError("Parsing error [_verify_equation] : Invalid character {} at position {}".format(char, str(self.args.equation.index(char) + 1)))
 
     def _split_equation(self, equation):
         """
@@ -60,13 +56,15 @@ class parser():
         equation = equation.split('=')
         self.left_poly.str = equation[0].lower()
         self.right_poly.str = equation[1].lower()
+        if self.right_poly.str.strip() == "" or self.left_poly.str.strip() == "":
+            raise NameError("Parsing error [_split_equation] : The equation is incomplete, missing one side.")
 
     def _update_polynomial(self, state, group, match):
         """
         After analysing each group of regex match, update the corresponding polynomial with the new coefficients/degrees
         """
         if group['sign'] != None and match.span()[0] == match.span()[1] and group['coef'] == None:
-            raise NameError("There is a trailing sign at the end of {} equation.".format(state['side']))
+            raise NameError("Parsing error [_update_polynomial] : There is a trailing sign at the end of {} equation.".format(state['side']))
         elif group['sign'] == None:
             group['sign'] = 1
         if group['degree'] == None:
@@ -101,7 +99,7 @@ class parser():
             group['coef'] = float(regex_match[2])
             return group, state
         else:
-            raise NameError("There is a sign missing before {} on {} equation.".format(regex_match[0], state['side']))
+            raise NameError("Parsing error [_get_coefficient_value] : There is a sign missing before {} on {} equation.".format(regex_match[0], state['side']))
 
     def _get_operation(self, state, group, match):
         """
@@ -125,7 +123,7 @@ class parser():
 
     def _get_degree(self, state, group, match):
         if state['sign_needed'] == True:
-            raise NameError("There is a sign missing before {} on {} equation.".format(match[0], state['side']))
+            raise NameError("Parsing error [_get_degree] : There is a sign missing before {} on {} equation.".format(match[0], state['side']))
         if match[5] == None:
             group['degree'] = 1
         else:
@@ -167,7 +165,7 @@ class parser():
         }
         for match in matches:
             if state['pos'] != match.span()[0]:
-                raise NameError("Unexpected character at position {} on the {} side of the equation.".format(state['pos'], side))
+                raise NameError("Parsing error [_parse_coefficients] : Unexpected character at position {} on the {} side of the equation.".format(state['pos'], side))
             if match[2] != None:
                 group, state = self._get_coefficient_value(state, group, match)
             elif match[7] != None:
@@ -213,6 +211,8 @@ class parser():
         """
         reduced_str = "Reduced form: "
         first = True
+        if self.reduced_form == {}:
+            return reduced_str + "0 = 0"
         for degree, coef in self.reduced_form.items():
             if coef < 0:
                 reduced_str = reduced_str + "- "
@@ -220,28 +220,29 @@ class parser():
             else:
                 if first == False:
                     reduced_str = reduced_str + "+ "
-            if coef.is_integer() == True:
+            if type(coef) == float and coef.is_integer() == True:
                 coef = int(coef)
-            reduced_str = reduced_str + str(coef)
-            reduced_str = reduced_str + " * X^"
-            reduced_str = reduced_str + str(degree) + " "
+            reduced_str = reduced_str + str(coef) + " "
+            if degree > 1:
+                reduced_str = reduced_str + "* X^"
+                reduced_str = reduced_str + str(degree) + " "
+            elif degree == 1:
+                reduced_str = reduced_str + "* X "
             if first == True:
                 first = False
         reduced_str = reduced_str + "= 0\n"
-        reduced_str = reduced_str + "Polynomial degree: {}".format(max(self.reduced_form))
+        if self.reduced_form != {}:
+            reduced_str = reduced_str + "Polynomial degree: {}".format(max(self.reduced_form))
         return reduced_str
 
     def parse(self):
         """
         Parsing method called from main
         """
-        try:
-            self._verify_equation(self.args.equation)
-            self._split_equation(self.args.equation)
-            self._parse_coefficients(self.left_poly, 'left')
-            self._parse_coefficients(self.right_poly, 'right')
-            self.reduced_form = self._create_reduced_form()
-            reduced_str = self._print_reduced_form()
-            print(reduced_str)
-        except Exception as e:
-            print("Error: {}".format(e))
+        self._verify_equation(self.args.equation)
+        self._split_equation(self.args.equation)
+        self._parse_coefficients(self.left_poly, 'left')
+        self._parse_coefficients(self.right_poly, 'right')
+        self.reduced_form = self._create_reduced_form()
+        reduced_str = self._print_reduced_form()
+        print(reduced_str)
