@@ -90,6 +90,7 @@ class parser():
             'sign': 1
         }
         state['multiplication_accepted'] = False
+        state['multiplication_symbol_last'] = False
         return group, state
 
     def _get_coefficient_value(self, state, group, regex_match):
@@ -142,6 +143,7 @@ class parser():
         if state['sign_needed'] == False:
             state['sign_needed'] = True
         state['multiplication_accepted'] = False
+        state['multiplication_symbol_last'] = False
         return group, state
 
     def _parse_coefficients(self, poly, side):

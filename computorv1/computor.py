@@ -63,7 +63,13 @@ class solver():
             if 0 in self.polynomial.keys():
                 self.x0 = (0 - self.polynomial[0]) / self.polynomial[1]
                 if len(str(self.x0)) - len(str(int(self.x0))) > 4:
-                    fraction = str(-self.polynomial[0]) + " / {}".format(self.polynomial[1])
+                    if -self.polynomial[0] < 0 and self.polynomial[1] < 0:
+                        numerator = self.polynomial[0]
+                        denominator = -self.polynomial[1]
+                    else:
+                        numerator = -self.polynomial[0]
+                        denominator = self.polynomial[1]
+                    fraction = "{} / {}".format(numerator, denominator)
                 if self.verbose == True:
                     print("X = {} / {}".format(- self.polynomial[0], self.polynomial[1]))
             else:
