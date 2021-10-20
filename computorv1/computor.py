@@ -107,11 +107,11 @@ class solver():
             print("x2 = {}".format(self.x2))
         elif self.discriminant == 0:
             print("Discriminant is 0, the solution is:")
-            self.x0 = -b/2*a
+            self.x0 = -b/(2*a)
             if self.x0.is_integer() == True:
                 self.x0 = int(self.x0)
             if self.verbose == True:
-                self._print_verbose(a, b, self.discriminant)
+                self._print_verbose(a, b)
             print("x0 = {}".format(self.x0))
         else:
             print("Discriminant is strictly negative, the two complex solutions are:")
