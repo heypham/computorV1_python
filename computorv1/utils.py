@@ -53,9 +53,12 @@ class parser():
         """
         Parse left/right polynomial
         """
+        equation = equation.strip()
         equation = equation.split('=')
         self.left_poly.str = equation[0].lower()
         self.right_poly.str = equation[1].lower()
+        if self.right_poly.str[-1] == '*' or self.left_poly.str[-1] == '*':
+            raise NameError("Parsing error [_split_equation] : Invalid syntax. There is a trailing *.")
         if self.right_poly.str.strip() == "" or self.left_poly.str.strip() == "":
             raise NameError("Parsing error [_split_equation] : The equation is incomplete, missing one side.")
 
@@ -97,6 +100,8 @@ class parser():
             state['new_factor'] = False
             state['multiplication_accepted'] = True
             group['coef'] = float(regex_match[2])
+            if state['multiplication_symbol_last'] == True:
+                state['multiplication_symbol_last'] = False
             return group, state
         else:
             raise NameError("Parsing error [_get_coefficient_value] : There is a sign missing before {} on {} equation.".format(regex_match[0], state['side']))
@@ -106,7 +111,9 @@ class parser():
         Verify if position for having a sign +- is valid from state and get its value
         """
         if state['new_factor'] == True and state['first_coef'] == False:
-            raise NameError("Two operation signs detected one after the other at pos {} on the {} side of equation.".format(state['pos'], state['side']))
+            raise NameError("Parsing error [_get_operation] : Two operation signs detected one after the other at pos {} on the {} side of equation.".format(state['pos'], state['side']))
+        elif state['multiplication_symbol_last'] == True:
+            raise NameError("Parsing error [_get_operation] : You forgot a x^a term after the * symbol at pos {} on {} equation.".format(state['pos'], state['side']))
         else:
             # If new operation, save previous group and update polynomial coef dict
             if state['first_coef'] == False:
@@ -154,6 +161,7 @@ class parser():
             'first_coef': True,
             'new_factor': True,
             'multiplication_accepted': False,
+            'multiplication_symbol_last': False,
             'pos': 0,
             'side': side,
             'sign_needed': False
@@ -177,6 +185,7 @@ class parser():
                     raise NameError("Misplaced multiplication sign at pos {} of {} side of equation.".format(state['pos'], side))
                 else:
                     state['multiplication_accepted'] = False
+                    state['multiplication_symbol_last'] = True
             if state['first_coef'] == True and (match[2] != None or match[3] != None):
                 state['first_coef'] = False
             state['pos'] += len(match[0])
