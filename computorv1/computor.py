@@ -118,8 +118,12 @@ class solver():
             complex_root = (-self.discriminant) ** 0.5
             if self.verbose == True:
                 self._print_verbose(a, b)
-            print("x1 = {} - i * {}".format(-b/(2*a), complex_root/(2*a)))
-            print("x2 = {} + i * {}".format(-b/(2*a), complex_root/(2*a)))
+            if b != 0:
+                print("x1 = {} - i * {}".format(-b/(2*a), complex_root/(2*a)))
+                print("x2 = {} + i * {}".format(-b/(2*a), complex_root/(2*a)))
+            else:
+                print("x1 = -i * {}".format(complex_root/(2*a)))
+                print("x2 = i * {}".format(complex_root/(2*a)))
 
     def _plot_equation(self):
         """
