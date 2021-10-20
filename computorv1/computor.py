@@ -92,7 +92,8 @@ class solver():
             print("Δ = {}\n".format(self.discriminant))
         if self.discriminant > 0:
             self.root_discriminant = self.discriminant ** 0.5
-            print("√Δ = {}\n".format(self.root_discriminant))
+            if self.verbose == True:
+                print("√Δ = {}\n".format(self.root_discriminant))
             print("Discriminant is strictly positive, the two real solutions are:")
             self.x1 = (-b - self.root_discriminant)/(2*a)
             self.x2 = (-b + self.root_discriminant)/(2*a)
