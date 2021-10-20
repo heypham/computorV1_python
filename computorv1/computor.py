@@ -131,21 +131,27 @@ class solver():
         """
         fig = plt.figure()
         # Setting margins
-        margin_ratio = 1.2
+        margin_ratio = 1.5
         if self.degree == 2:
             if self.discriminant > 0:
-                left_border = self.x1 * margin_ratio
-                right_border = self.x2 * margin_ratio
+                if abs(self.x1) > 0 and abs(self.x1) < 1:
+                    left_border = self.x1 - abs(self.x1) / margin_ratio
+                else:
+                    left_border = self.x1 - abs(self.x1) * margin_ratio
+                if abs(self.x2) > 0 and abs(self.x2) < 1:
+                    right_border = self.x2 + abs(self.x2) / margin_ratio
+                else:
+                    right_border = self.x2 + abs(self.x2) * margin_ratio
             elif self.discriminant == 0:
-                left_border = self.x0 * margin_ratio
-                right_border = self.x0 * margin_ratio
+                left_border = self.x0 - abs(self.x0) * margin_ratio
+                right_border = self.x0 + abs(self.x0) * margin_ratio
             else:
                 print("Cannot plot a polynomial with complex roots.")
                 return
         elif self.degree == 1:
             if self.x0 != 0:
-                left_border = self.x0 - self.x0*margin_ratio
-                right_border = self.x0 + self.x0*margin_ratio
+                left_border = self.x0 - abs(self.x0) * margin_ratio
+                right_border = self.x0 + abs(self.x0) * margin_ratio
             else:
                 left_border = self.x0 - margin_ratio
                 right_border = self.x0 + margin_ratio

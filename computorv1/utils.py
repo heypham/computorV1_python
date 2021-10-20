@@ -191,7 +191,7 @@ class parser():
         reduced = {}
         left = self.left_poly.coefs
         right = self.right_poly.coefs
-        for degree, coef in list(left.items()):
+        for degree in sorted(left):
             if degree in right.keys():
                 reduced[degree] = left[degree] - right[degree]
                 del left[degree], right[degree]
@@ -203,6 +203,7 @@ class parser():
         for degree, coef in list(reduced.items()):
             if coef == 0:
                 del reduced[degree]
+        reduced = dict(sorted(reduced.items()))
         return reduced
 
     def _print_reduced_form(self):
