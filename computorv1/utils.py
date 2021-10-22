@@ -29,9 +29,9 @@ class parser():
         Parse arguments from command line and stores equation/verbose arguments
         """
         try:
-            parser = argparse.ArgumentParser(prog='computor', usage='python3 %(prog)s.py [-h] equation', description='Equation solver')
-            parser.add_argument('-v', '--verbose', help='increase output verbosity', action='store_true')
-            parser.add_argument('-p', '--plot', help='display function graph', action='store_true')
+            parser = argparse.ArgumentParser(prog='computor', usage='python3 %(prog)s.py [-h] equation', description='Equation solver', prefix_chars='@')
+            parser.add_argument('@v', '@@verbose', help='increase output verbosity', action='store_true')
+            parser.add_argument('@p', '@@plot', help='display function graph', action='store_true')
             parser.add_argument('equation', help='equation in the form "a * x^2 + b * x^1 + c * x^0 = d * x^2 + e * x^1 + f * x^0"', type=str)
             args = parser.parse_args()
             return args
